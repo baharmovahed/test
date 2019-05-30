@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"encoding/json"
-
 	"github.com/jinzhu/gorm"
     _ "github.com/jinzhu/gorm/dialects/mysql"
 	
@@ -20,15 +19,20 @@ type Test3 struct {
   Payload []byte
 }
 
-
-
-type User struct {
+type Test4 struct {
   gorm.Model
-  UserName string
-  UserID string
-  Phone string
-  Mail string
+  Page   float64
+  Fruit string
 }
+
+
+// type User struct {
+//   gorm.Model
+//   UserName string
+//   UserID string
+//   Phone string
+//   Mail string
+// }
 
 // type Devices struct {
 //   gorm.Model
@@ -90,16 +94,30 @@ func main() {
 			fmt.Println(topic)
 			// fmt.Println(msg.Payload())
 
+			//deCode
 			var dat map[string]interface{}
+
 			if err := json.Unmarshal(msg.Payload(), &dat); err != nil {
         panic(err)
 			}
-			
-			fmt.Println(dat)
 
-			db.AutoMigrate(&Test3{})
-			db.Create(&Test3{Topic: topic , Payload: msg.Payload() })
+			page := dat["Page"].(float64)
+			fruits := dat["Fruits"].([]interface{})
+			fruit := fruits[0].(string)
+
+			fmt.Println(dat)
+			fmt.Println(page)
+			fmt.Println(fruit)
+
+			//create a record
+			db.AutoMigrate(&Test4{})
+			db.Create(&Test4{Page: page , Fruit: fruit })
+
 			
+
+			// create record (json)
+			// db.AutoMigrate(&Test3{})
+			// db.Create(&Test3{Topic: topic , Payload: msg.Payload() })
 			
 		}
 	})
@@ -110,4 +128,3 @@ func main() {
 
 	}
 }
-
