@@ -1,13 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"os"
+	// "os"
 
 	emitter "github.com/emitter-io/go/v2"
 )
 
-const channelKey = "-VxE2t5me8RyGRxbzqdvH_mcnMkYMMJC"
+const channelKey = "KBUaNMCiMKjifJVGJdGKvWCIY_C4qXyA/"
+
+type response1 struct {
+    Page   int
+    Fruits []string
+}
 
 func main() {
 
@@ -15,6 +21,14 @@ func main() {
 		fmt.Printf("[emitter] -> [A] received: '%s' topic: '%s'\n", msg.Payload(), msg.Topic())
 	})
 
+	res2D := &response1{
+		Page : 2,
+		Fruits : []string{"hh","llll","sss"}}
+    res2B, _ := json.Marshal(res2D)
+
 	fmt.Println("[emitter] <- [B] publishing to 'sdk-integration-test/'")
-	c.Publish(channelKey, "test4/", os.Args[1])
+	c.Publish(channelKey, "dev/s/", res2B)
 }
+
+
+//os.Args[1]
