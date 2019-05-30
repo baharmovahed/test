@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"encoding/json"
 
 	"github.com/jinzhu/gorm"
-  _ "github.com/jinzhu/gorm/dialects/mysql"
+    _ "github.com/jinzhu/gorm/dialects/mysql"
+	
 
 	emitter "github.com/emitter-io/go/v2"
 )
@@ -19,13 +21,14 @@ type Test3 struct {
 }
 
 
-// type User struct {
-//   gorm.Model
-//   UserName string
-//   UserID string
-//   Phone string
-//   Mail string
-// }
+
+type User struct {
+  gorm.Model
+  UserName string
+  UserID string
+  Phone string
+  Mail string
+}
 
 // type Devices struct {
 //   gorm.Model
@@ -43,48 +46,61 @@ type Test3 struct {
 // type Lumen struct {
 // 	gorm.Model
 // 	ParentID string
-// 	Min string
-// 	Max string
+// 	Min []byte
+// 	Max []byte
 // }
 
 // type Humid struct {
 // 	gorm.Model
 // 	ParentID string
-// 	Min string
-// 	Max string
+// 	Min []byte
+// 	Max []byte
 // }
 
 // type Soil struct {
 // 	gorm.Model
 // 	ParentID string
-// 	SoilOneMin string
-// 	SoilOneMax string
-// 	SoilTwoMin string
-// 	SoilTwoMax string
-// 	SoilThreeMin string
-// 	SoilThreeMax string
-// 	SoilFourMin string
-// 	SoilFourMax string
+// 	SoilOneMin []byte
+// 	SoilOneMax []byte
+// 	SoilTwoMin []byte
+// 	SoilTwoMax []byte
+// 	SoilThreeMin []byte
+// 	SoilThreeMax []byte
+// 	SoilFourMin []byte
+// 	SoilFourMax []byte
 // }
 
 
 func main() {
+
+	//conect to DB
 	db, err := gorm.Open("mysql", "root:@/iotree?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
 		panic("failed to connect database")
 	}
 	defer db.Close()
 
-	
-
+	//connect to broker
 	c, _ := emitter.Connect("tcp://198.143.182.157:1883", func(_ *emitter.Client, msg emitter.Message) {
-		// fmt.Printf("[emitter] -> [A] received: '%s' topic: '%s'\n", msg.Payload(), msg.Topic())
-		topic , shit  := msg.Topic() , "stats/52540026181c/" 
-		if ( topic != shit ){
-			fmt.Printf(topic)
+
+		topic , trash  := msg.Topic() , "stats/52540026181c/" 
+
+		if ( topic != trash ){
+
+			fmt.Println(topic)
+			// fmt.Println(msg.Payload())
+
+			var dat map[string]interface{}
+			if err := json.Unmarshal(msg.Payload(), &dat); err != nil {
+        panic(err)
+			}
 			
+			fmt.Println(dat)
+
 			db.AutoMigrate(&Test3{})
 			db.Create(&Test3{Topic: topic , Payload: msg.Payload() })
+			
+			
 		}
 	})
 
@@ -94,3 +110,4 @@ func main() {
 
 	}
 }
+
